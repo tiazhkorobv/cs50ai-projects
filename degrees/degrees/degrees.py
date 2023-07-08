@@ -92,8 +92,58 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
+
+    # Create a starting node with the source person
+    start = Node(state=source, parent=None, action=None)
+
+    # Initialize a queue frontier
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    # Initialize an empty explored set to keep track of visited nodes
+    explored = set()
+
+    # Iterate until the frontier is empty
+    while not frontier.empty():
+        # Remove a node from the frontier
+        current_node = frontier.remove()
+
+        # Mark the current node as explored
+        explored.add(current_node.state)
+
+        # Check if the current node is the target person
+        if current_node.state == target:
+            # Generate the path by backtracking through the parent pointers
+            path = []
+            while current_node.parent is not None:
+                path.append((current_node.action, current_node.state))
+                current_node = current_node.parent
+            path.reverse()
+            return path
+
+        # Get the neighbors of the current node
+        neighbors = neighbors_for_person(current_node.state)
+
+        # Add unexplored neighbor nodes to the frontier
+        for movie_id, person_id in neighbors:
+            if not frontier.contains_state(person_id) and person_id not in explored:
+                neighbor_node = Node(state=person_id, parent=current_node, action=movie_id)
+                frontier.add(neighbor_node)
+
+                # Check if the neighbor node is the target person
+                if person_id == target:
+                    path = []
+                    while neighbor_node.parent is not None:
+                        path.append((neighbor_node.action, neighbor_node.state))
+                        neighbor_node = neighbor_node.parent
+                    path.reverse()
+                    return path
+
+    # No path found
+    return None
+
     # TODO
-    raise NotImplementedError
+    # raise NotImplementedError
 
 
 def person_id_for_name(name):
